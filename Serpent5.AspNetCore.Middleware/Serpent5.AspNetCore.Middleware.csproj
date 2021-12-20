@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Authors>Kirk Larkin</Authors>
+    <Description>...</Description>
+    <RepositoryUrl>https://github.com/serpent5/Serpent5.AspNetCore.Middleware</RepositoryUrl>
+    <PackageIconUrl>http://icons.iconarchive.com/icons/ph03nyx/super-mario/128/Shell-Green-icon.png</PackageIconUrl>
+    <PackageIcon>serpent5.png</PackageIcon>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\serpent5.png" Pack="true" PackagePath="/"></None>
+    <None Include="..\README.md" Pack="true" PackagePath="/"></None>
+  </ItemGroup>
+</Project>
