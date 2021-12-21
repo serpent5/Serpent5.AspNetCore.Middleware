@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Builder;
+using Serpent5.AspNetCore.Middleware.CacheHeaders;
 
-namespace Serpent5.AspNetCore.Middleware.CacheHeaders;
+namespace Microsoft.AspNetCore.Builder;
 
 public static class CacheHeadersMiddlewareExtensions
 {

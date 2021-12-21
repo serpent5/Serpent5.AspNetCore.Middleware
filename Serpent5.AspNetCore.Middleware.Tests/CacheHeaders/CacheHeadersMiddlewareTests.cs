@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Net.Http.Headers;
-using Serpent5.AspNetCore.Middleware.CacheHeaders;
 using Xunit;
 
 namespace Serpent5.AspNetCore.Middleware.Tests.CacheHeaders;
@@ -76,18 +77,18 @@ public class CacheHeadersMiddlewareTests
     private static async ValueTask<HttpResponseMessage> RunCacheHeadersMiddlewarePipeline(
         Action<IApplicationBuilder>? configureApplicationBuilder = null)
     {
-        var webApplicationBuilder = WebApplication.CreateBuilder();
+        var testHost = await new HostBuilder()
+            .ConfigureWebHostDefaults(webHostBuilder =>
+            {
+                webHostBuilder.UseTestServer()
+                    .Configure(applicationBuilder =>
+                    {
+                        applicationBuilder.UseCacheHeaders();
+                        configureApplicationBuilder?.Invoke(applicationBuilder);
+                    });
+            })
+            .StartAsync();
 
-        webApplicationBuilder.WebHost.UseTestServer();
-
-        var webApplication = webApplicationBuilder.Build();
-
-        webApplication.UseCacheHeaders();
-
-        configureApplicationBuilder?.Invoke(webApplication);
-
-        await webApplication.StartAsync();
-
-        return await webApplication.GetTestClient().GetAsync("/");
+        return await testHost.GetTestClient().GetAsync("/");
     }
 }
