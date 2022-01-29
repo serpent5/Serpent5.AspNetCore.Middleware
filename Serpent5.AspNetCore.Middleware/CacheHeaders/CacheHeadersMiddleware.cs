@@ -17,8 +17,8 @@ public class CacheHeadersMiddleware
         ctx.Response.OnStarting(
             static ctxAsObject =>
             {
-                var httpContext = (HttpContext)ctxAsObject;
-                var httpResponseHeaders = httpContext.Response.GetTypedHeaders();
+                var ctx = (HttpContext)ctxAsObject;
+                var httpResponseHeaders = ctx.Response.GetTypedHeaders();
 
                 // It's common to set "Cache-Control: no-cache, no-store".
                 // According to MDN (https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control):
@@ -28,13 +28,21 @@ public class CacheHeadersMiddleware
                 if (httpResponseHeaders.CacheControl is { NoCache: true, NoStore: true })
                     httpResponseHeaders.CacheControl = null;
 
-                httpResponseHeaders.CacheControl ??= new()
-                {
-                    NoStore = true
-                };
+                // Prefer ETag over Last-Modified.
+                if (httpResponseHeaders.ETag is not null)
+                    httpResponseHeaders.LastModified = null;
 
-                // The "Cache-Control" header supercedes "Pragma: no-cache".
-                httpContext.Response.Headers.Remove(HeaderNames.Pragma);
+                // Set a default Cache-Control header
+                if (httpResponseHeaders.ETag is not null || httpResponseHeaders.LastModified is not null)
+                    // Resources with a version identifier should be checked first.
+                    httpResponseHeaders.CacheControl ??= new() { NoCache = true };
+                else
+                    // All other resources aren't cacheable.
+                    httpResponseHeaders.CacheControl ??= new() { NoStore = true };
+
+                // The Cache-Control header supercedes Expires and Pragma.
+                ctx.Response.Headers.Remove(HeaderNames.Expires);
+                ctx.Response.Headers.Remove(HeaderNames.Pragma);
 
                 return Task.CompletedTask;
             },
